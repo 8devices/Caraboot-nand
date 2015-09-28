@@ -9,6 +9,7 @@ obj-$(CONFIG_PPC4xx_EMAC) += 4xx_enet.o
 obj-$(CONFIG_ALTERA_TSE) += altera_tse.o
 obj-$(CONFIG_ARMADA100_FEC) += armada100_fec.o
 obj-$(CONFIG_DRIVER_AT91EMAC) += at91_emac.o
+obj-$(CONFIG_ATHRS_GMAC) += athrs_gmac/
 obj-$(CONFIG_DRIVER_AX88180) += ax88180.o
 obj-$(CONFIG_BCM_SF2_ETH) += bcm-sf2-eth.o
 obj-$(CONFIG_BCM_SF2_ETH_GMAC) += bcm-sf2-eth-gmac.o
