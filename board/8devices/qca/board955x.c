@@ -28,7 +28,6 @@
 #include <version.h>
 #include <atheros.h>
 
-#include <device_mode.h>
 int wasp_boot_status = 0;  // Global variable to indicate if boot is succesful
 			  // negative values show failure
 typedef struct gpio_led_desc {
@@ -68,6 +67,8 @@ static int  led_count=0;
 static struct gpio_led_desc leds[] = {
 //	{ .id=0, .bit=1, .polarity=1 }, // LEDX
 };
+static int  switch_led_count=0;
+static struct switch_led_desc switch_leds[] = {};
 #endif
 
 extern int ath_ddr_initial_config(uint32_t refresh);
@@ -188,29 +189,6 @@ void ath_gpio_config(void)
 	ath_reg_wr_nf(GPIO_CLEAR_ADDRESS, ALL_LED_GPIO);
 }
 
-//functions for GPIO control
-void show_boot_progress(int arg)
-{
-	debug("%s : %d arg: %d\n", __func__, __LINE__, arg);
-
-	if (arg == BOOTSTAGE_ID_BOARD_INIT_R)		//RAM init OK
-		gpio_led_switch(LED_WLAN ,0);		//RSSI4 off
-	//else if (arg == BOOTSTAGE_ID_NET_ETH_INIT) 	//Flash, ethernet init OK
-	else if (arg == BOOTSTAGE_ID_CHECK_ARCH) 	//Image Checksum OK
-		gpio_led_switch(LED_ETH_YELLOW ,0);		//RSSI2 off
-	//else if (arg == BOOTSTAGE_ID_DECOMP_SUCCESS)	//Uncompress OK
-	else if (arg == BOOTSTAGE_ID_RUN_OS)		//Starting kernel..
-		gpio_led_switch(LED_ETH_GREEN ,0);		//WLAN off
-	else if (arg == IND_BL_AUTH_FAIL ||		//Set status for blinking
-		 arg == IND_BL_TFTP_DOWNLOAD ||		//indications in show_activity()
-		 arg == IND_BL_START_PROD ||
-		 arg == IND_BL_TFTP_DOWNLOAD  ||
-		 arg == IND_BL_DHCP_PROGRESS  ||
-		 arg == 0)
-		wasp_boot_status = arg;
-	return;
-}
-
 void gpio_led_switch(int led_id, int state)
 {
 	// debug("%s : %d id: %d state: %d\n", __func__, __LINE__, led_id, state);
@@ -262,27 +240,12 @@ void switch_led_switch(int led_id, int state)
 	return;
 }
 
-void show_activity(int arg)
-{
-	// printf("%s : %d arg: %d boot_status: %d\n", __func__, __LINE__, arg, wasp_boot_status);
-	
-	uint32_t time = 0;
-	time =get_timer(0);
-	int led;
-
-	if (wasp_boot_status == IND_BL_AUTH_FAIL){
-		gpio_led_switch(LED_ETH_GREEN ,(time>>9)&0x01);
-		gpio_led_switch(LED_ETH_YELLOW ,(time>>9)&0x01);
-	}
-	return;
-}
-
 int read_reset_button(void)
 {
 	return ((~(ath_reg_rd(GPIO_IN_ADDRESS)>>CONFIG_RESET_BUTTON_GPIO)) & 0x01);
 }
 
-void hw_watchdog_reset(void)
+void show_activity(int arg)
 {
 
 }
@@ -328,11 +291,12 @@ phys_size_t initdram(int board_type)
 	return (ath_mem_config());
 }
 
-int	checkboard(args)
+int	show_board_info(args)
 {
-	printf("=====================================\n");
-	printf(" QCA9558 U-boot\n");
-	printf("-------------------------------------\n");
+	printf("=========================================\n");
+	printf("Caraboot v2.2-dev (QCA9557, NAND) U-boot\n");
+	printf("http://www.8devices.com/\n");
+	printf("-----------------------------------------\n");
 	return 0;
 }
 
@@ -343,9 +307,14 @@ void _machine_restart(void)
 	}
 }
 
+#ifdef CONFIG_ATHRS_GMAC
 extern int ath_gmac_enet_initialize(bd_t * bis);
+#endif
 
 int board_eth_init(bd_t *bis)
 {
+#ifdef CONFIG_ATHRS_GMAC
 	return ath_gmac_enet_initialize(bis);
+#endif
+	return -1;//TODO really -1 ??
 }

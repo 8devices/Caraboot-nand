@@ -6,8 +6,8 @@
 #
 
 obj-y	+= cache.o
-obj-y	+= cache_init.o
-obj-y	+= io.o
+# obj-y	+= cache_init.o #TODO
+obj-y	+= io.o 
 
 obj-$(CONFIG_CMD_BOOTM) += bootm.o
 

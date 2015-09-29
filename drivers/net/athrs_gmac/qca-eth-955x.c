@@ -163,9 +163,9 @@ static int ath_gmac_recv(struct eth_device *dev)
 
 		length = f->pkt_size;
 
-		NetReceive(NetRxPackets[mac->next_rx] , length - 4);
+		net_process_received_packet(net_rx_packets[mac->next_rx] , length - 4);
 
-		flush_cache((u32) NetRxPackets[mac->next_rx] , PKTSIZE_ALIGN);
+		flush_cache((u32) net_rx_packets[mac->next_rx] , PKTSIZE_ALIGN);
 
 		ath_gmac_reg_wr(mac,0x194,1);
 		ath_gmac_rx_give_to_dma(f);
@@ -577,8 +577,8 @@ static int ath_gmac_clean_rx(struct eth_device *dev, bd_t * bd)
 
 	for (i = 0; i < PKTBUFSRX; i++) {
 		fr = mac->fifo_rx[i];
-		fr->pkt_start_addr = virt_to_phys(NetRxPackets[i]);
-		flush_cache((u32) NetRxPackets[i], PKTSIZE_ALIGN);
+		fr->pkt_start_addr = virt_to_phys(net_rx_packets[i]);
+		flush_cache((u32) net_rx_packets[i], PKTSIZE_ALIGN);
 		ath_gmac_rx_give_to_dma(fr);
 	}
 
@@ -724,7 +724,7 @@ static void ath_gmac_get_ethaddr(struct eth_device *dev)
 	debug("Set MAC:");
 	debug("%x:%x:%x:%x:%x:%x\n", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 	/* Use fixed address if the above address is invalid */
-	if (!is_valid_ether_addr(mac))
+	if (!is_valid_ethaddr(mac))
 	{
 			mac[0] = 0x00;
 			mac[1] = 0x03;

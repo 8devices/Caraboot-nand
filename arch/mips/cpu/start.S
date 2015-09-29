@@ -134,6 +134,18 @@ reset:
 	mtc0	t0, CP0_CONFIG
 #endif
 
+
+/* QCA specific */
+#ifdef CONFIG_ATH_NAND_BR
+	/*
+	 * Clear WDT that was setup in first stage for
+	 * NAND Boot-ROM
+	 */
+/* 	li	t0,	0xb8060008 */
+/* 	sw	zero,	0(t0) */
+#endif /* CONFIG_ATH_NAND_BR */
+
+
 	/*
 	 * Initialize $gp, force pointer sized alignment of bal instruction to
 	 * forbid the compiler to put nop's between bal and _gp. This is
@@ -187,7 +199,8 @@ reset:
 	PTR_ADDU t0, k0, GD_MALLOC_BASE	# gd->malloc_base offset
 	sw	sp, 0(t0)
 #endif
-
+					# a0 = boot_flags
+	move	a0, zero		# set boot_flags argument to 0
 	PTR_LA	t9, board_init_f
 	jr	t9
 	 move	ra, zero

@@ -115,6 +115,7 @@ serial_initfunc(amirix_serial_initialize);
 serial_initfunc(arc_serial_initialize);
 serial_initfunc(arm_dcc_initialize);
 serial_initfunc(asc_serial_initialize);
+serial_initfunc(ath79_serial_initialize);
 serial_initfunc(atmel_serial_initialize);
 serial_initfunc(au1x00_serial_initialize);
 serial_initfunc(bfin_jtag_initialize);
@@ -208,6 +209,7 @@ void serial_initialize(void)
 	arc_serial_initialize();
 	arm_dcc_initialize();
 	asc_serial_initialize();
+	ath79_serial_initialize();
 	atmel_serial_initialize();
 	au1x00_serial_initialize();
 	bfin_jtag_initialize();

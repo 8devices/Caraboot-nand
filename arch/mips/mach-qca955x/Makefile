@@ -7,4 +7,5 @@
 
 # obj-y	 = start.o
 # obj-y	+= cpu.o
-obj-y	+= cache.o 955x.o init-955x.o tap-955x
+extra-y += 955x.o tap-955x.o
+obj-y	+= cache.o 955x.o init-955x.o

@@ -47,6 +47,31 @@ static void ath_spi_write_page(uint32_t addr, uint8_t * data, int len);
 #endif
 static void ath_spi_sector_erase(uint32_t addr);
 
+#define FLASH_M25P64    0x00F2
+unsigned long
+flash_get_geom (flash_info_t *flash_info)
+{
+	int i;
+
+	/* XXX this is hardcoded until we figure out how to read flash id */
+
+	flash_info->flash_id = FLASH_M25P64;
+	flash_info->size = CFG_FLASH_SIZE; /* bytes */
+	flash_info->sector_count = flash_info->size / CFG_FLASH_SECTOR_SIZE;
+
+	for (i = 0; i < flash_info->sector_count; i++) {
+		flash_info->start[i] = CFG_FLASH_BASE +
+					(i * CFG_FLASH_SECTOR_SIZE);
+		flash_info->protect[i] = 0;
+	}
+
+	debug ("flash size %dMB, sector count = %d\n",
+			CFG_FLASH_SIZE, flash_info->sector_count);
+
+	return (flash_info->size);
+}
+
+
 static void
 ath_spi_read_id(void)
 {

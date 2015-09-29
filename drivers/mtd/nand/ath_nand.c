@@ -1176,8 +1176,8 @@ ath_parse_read_id(ath_nand_sc_t *sc)
 		}
 	}
 
-	for (i = 0; i < nand_flash_ids[i].id; i++) {
-		if (nand_flash_ids[i].id == sc->nid.did) {
+	for (i = 0; i < nand_flash_ids[i].dev_id; i++) {
+		if (nand_flash_ids[i].dev_id == sc->nid.did) {
 			debug(" %s [%luMB]\n", nand_flash_ids[i].name,
 				nand_flash_ids[i].chipsize);
 			return nand_flash_ids[i].chipsize;

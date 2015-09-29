@@ -6,7 +6,4 @@
 #
 
 obj-y	= board955x.o
-obj-y	+= common/tap-955x.o
-obj-y	+= common/init-955x.o
-obj-y	+= common/955x.o
-
+obj-y	+= qca_art_nand.o
