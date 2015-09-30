@@ -778,6 +778,8 @@ ifneq ($(CONFIG_BUILD_TARGET),)
 ALL-y += $(CONFIG_BUILD_TARGET:"%"=%)
 endif
 
+ALL-$(CONFIG_QCA_NAND_IMG) += u-boot.nand
+
 LDFLAGS_u-boot += $(LDFLAGS_FINAL)
 ifneq ($(CONFIG_SYS_TEXT_BASE),)
 LDFLAGS_u-boot += -Ttext $(CONFIG_SYS_TEXT_BASE)
@@ -880,6 +882,10 @@ OBJCOPYFLAGS_u-boot.ldr.srec := -I binary -O srec
 u-boot.ldr.hex u-boot.ldr.srec: u-boot.ldr FORCE
 	$(call if_changed,objcopy)
 
+u-boot.nand: 	u-boot.bin
+		cd arch/mips/mach-qca955x/romdrv/rom-boot-drv-sco/ && ./mk2stage -2 ../../../../../u-boot.bin -o ../../../../../u-boot.nand
+		cp u-boot.bin u-boot-ram.bin
+		cp u-boot.nand u-boot.bin
 #
 # U-Boot entry point, needed for booting of full-blown U-Boot
 # from the SPL U-Boot version.
