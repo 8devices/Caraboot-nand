@@ -1532,6 +1532,8 @@ static ulong ath_nand_probe(void)
 	mtd->_block_isbad	= ath_nand_block_isbad;
 	mtd->_block_markbad	= ath_nand_block_markbad;
 
+	mtd->writebufsize = mtd->writesize;
+	
 	mtd->priv		= sc;
 
 	ath_nand_ecc_init(mtd);
