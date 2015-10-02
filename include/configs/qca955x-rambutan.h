@@ -21,7 +21,7 @@
 #define CONFIG_SKIP_LOWLEVEL_INIT
 #define CONFIG_SYS_GENERIC_GLOBAL_DATA
 
-#define DEBUG
+#undef DEBUG
 
 // NAND
 #define CONFIG_NAND_ATHEROS 1
@@ -104,10 +104,9 @@
  */
 
 #define CONFIG_CMD_MII
-
 #define CONFIG_CMD_ATHREG
-
 #define CONFIG_NET_RETRY_COUNT 1
+#define	CONFIG_DISPLAY_BOARDINFO
 
 // #undef CONFIG_CMD_FLASH
 
@@ -205,6 +204,7 @@
 	"mtdparts="MTDPARTS_DEFAULT"\0" 							\
 	"args_common=console=ttyS0,115200 init=/linuxrc\0" 					\
 	"args1=ubi.mtd=3 root=ubi0:rootfs1 rootfstype=ubifs ro\0"				\
-	"args2=ubi.mtd=3 root=ubi0:rootfs2 rootfstype=ubifs ro\0"
+	"args2=ubi.mtd=3 root=ubi0:rootfs2 rootfstype=ubifs ro\0"				\
+	"tftptimeout=5000\0"
 
 #endif	/* __RAMBUTAN_CONFIG_H */

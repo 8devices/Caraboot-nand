@@ -43,25 +43,7 @@ typedef struct switch_led_desc {
   int offset3;
 };
 
-#if defined (CONFIG_FWBD2900) || defined (CONFIG_FWBD3000) || defined (CONFIG_FWBD2901)
 
-#define ALL_LED_GPIO 0xF00000
-static int  led_count=4;
-static struct gpio_led_desc leds[] = {
-	{ .id=0, .bit=20, .polarity=1 }, // LED_POWER
-	{ .id=1, .bit=22, .polarity=1 }, // LED_ETH_GREEN
-	{ .id=2, .bit=21, .polarity=1 }, // LED_ETH_YELLOW
-	{ .id=3, .bit=23, .polarity=1 }, // LED_WLAN
-};
-
-static int  switch_led_count=3;
-static struct switch_led_desc switch_leds[] = {
-	{ .id=0, .offset1=8, .offset2=14, .offset3=20 }, // LED_SW_0
-	{ .id=1, .offset1=10, .offset2=16, .offset3=22 }, // LED_SW_1
-	{ .id=2, .offset1=12, .offset2=18, .offset3=24 }, // LED_SW_2
-};
-
-#else defined (CONFIG_FWBD2800)
 #define ALL_LED_GPIO 0
 static int  led_count=0;
 static struct gpio_led_desc leds[] = {
@@ -69,7 +51,6 @@ static struct gpio_led_desc leds[] = {
 };
 static int  switch_led_count=0;
 static struct switch_led_desc switch_leds[] = {};
-#endif
 
 extern int ath_ddr_initial_config(uint32_t refresh);
 extern int ath_ddr_find_size(void);
@@ -291,12 +272,12 @@ phys_size_t initdram(int board_type)
 	return (ath_mem_config());
 }
 
-int	show_board_info(args)
+int checkboard(args)
 {
-	printf("=========================================\n");
-	printf("Caraboot v2.2-dev (QCA9557, NAND) U-boot\n");
-	printf("http://www.8devices.com/\n");
-	printf("-----------------------------------------\n");
+	puts("=========================================\n");
+	puts("Caraboot v2.2-dev (QCA9557, NAND) U-Boot\n");
+	puts("http://www.8devices.com/\n");
+	puts("-----------------------------------------\n");
 	return 0;
 }
 
@@ -315,6 +296,7 @@ int board_eth_init(bd_t *bis)
 {
 #ifdef CONFIG_ATHRS_GMAC
 	return ath_gmac_enet_initialize(bis);
+#else
+	return -1;
 #endif
-	return -1;//TODO really -1 ??
 }
