@@ -13,6 +13,9 @@
 #include <menu.h>
 #include <post.h>
 #include <u-boot/sha256.h>
+#ifdef CONFIG_FACTORY_MODE
+#include <factory.h>
+#endif
 
 DECLARE_GLOBAL_DATA_PTR;
 
@@ -361,7 +364,9 @@ void autoboot_command(const char *s)
 #if defined(CONFIG_AUTOBOOT_KEYED) && !defined(CONFIG_AUTOBOOT_KEYED_CTRLC)
 		int prev = disable_ctrlc(1);	/* disable Control C checking */
 #endif
-
+#ifdef CONFIG_FACTORY_MODE
+		factory_mode_start();
+#endif
 		run_command_list(s, -1, 0);
 
 #if defined(CONFIG_AUTOBOOT_KEYED) && !defined(CONFIG_AUTOBOOT_KEYED_CTRLC)

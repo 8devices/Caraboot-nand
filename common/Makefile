@@ -200,6 +200,7 @@ obj-$(CONFIG_CONSOLE_MUX) += iomux.o
 obj-y += flash.o
 obj-$(CONFIG_CMD_KGDB) += kgdb.o kgdb_stubs.o
 obj-$(CONFIG_I2C_EDID) += edid.o
+obj-$(CONFIG_FACTORY_MODE) += factory.o
 obj-$(CONFIG_KALLSYMS) += kallsyms.o
 obj-y += splash.o
 obj-$(CONFIG_SPLASH_SOURCE) += splash_source.o
