@@ -93,21 +93,27 @@ athrs_ar8033_reg_init(void *arg)
 {
 	unsigned int id1, id2, val;
 	int i;
+	int mac_unit;
+	
+	mac_unit = *(int *)arg;
+	printf("%s: MAC unit: %x\n", __func__, mac_unit);
 
-	id1 = phy_reg_read(0, CONFIG_AR8035_PHY_ADDR, 2);
-	id2 = phy_reg_read(0, CONFIG_AR8035_PHY_ADDR, 3);
+	id1 = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 2);
+	id2 = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 3);
 
 	debug("%s: id1=%X, id2=%X\n", __func__, id1, id2);
 
-	phy_reg_write(0, CONFIG_AR8035_PHY_ADDR, 0x1d, 0);
-	val = phy_reg_read(0, CONFIG_AR8035_PHY_ADDR, 0x1E);
-	phy_reg_write(0, CONFIG_AR8035_PHY_ADDR, 0x1d, 0x5);
-	val = phy_reg_read(0, CONFIG_AR8035_PHY_ADDR, 0x1E);
-	phy_reg_write(0, CONFIG_AR8035_PHY_ADDR, 0x1e, 0x2D47);
-	val = phy_reg_read(0, CONFIG_AR8035_PHY_ADDR, 0x1E);
+	if (mac_unit == 1) {
+		phy_reg_write(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1d, 0);
+		val = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1E);
+		phy_reg_write(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1d, 0x5);
+		val = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1E);
+		phy_reg_write(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1e, 0x2D47);
+		val = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 0x1E);
 
-	debug("%s: Done %x \n",__func__, phy_reg_read(0x1,CONFIG_AR8035_PHY_ADDR,0x1f));
-   
+		debug("%s: Done %x \n",__func__, phy_reg_read(mac_unit,CONFIG_AR8035_PHY_ADDR,0x1f));
+	}
+
 	return 0;
 }
 

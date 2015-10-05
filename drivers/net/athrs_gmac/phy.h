@@ -26,8 +26,8 @@
 
 #define ath_gmac_unit2name(_unit) (_unit ?  "eth1" : "eth0")
 
-extern int ath_gmac_miiphy_read(char *devname, uint32_t phaddr, uint8_t reg, uint16_t *data);
-extern int ath_gmac_miiphy_write(char *devname, uint32_t phaddr, uint8_t reg, uint16_t data);
+extern int ath_gmac_miiphy_read(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short *data);
+extern int ath_gmac_miiphy_write(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short data);
 
 #define phy_reg_read(base, addr, reg)	\
 	ath_gmac_miiphy_read(ath_gmac_unit2name(base), addr, reg, NULL)

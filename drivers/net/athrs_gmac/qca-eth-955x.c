@@ -44,8 +44,9 @@
 #define ath_gmac_unit2mac(_unit)     ath_gmac_macs[(_unit)]
 #define ath_gmac_name2mac(name)	   is_drqfn() ? ath_gmac_unit2mac(1):strcmp(name,"eth0") ? ath_gmac_unit2mac(1) : ath_gmac_unit2mac(0)
 
-int ath_gmac_miiphy_read(char *devname, uint32_t phaddr, uint8_t reg, uint16_t *data);
-int ath_gmac_miiphy_write(char *devname, uint32_t phaddr, uint8_t reg, uint16_t data);
+int ath_gmac_miiphy_read(const char *devname, unsigned char addr, unsigned char reg, unsigned short *value);
+int ath_gmac_miiphy_write(const char *devname, unsigned char addr, unsigned char reg, unsigned short value);
+
 extern void ath_sys_frequency(uint32_t *, uint32_t *, uint32_t *);
 extern void rgmii_calib(ath_gmac_mac_t * mac);
 
@@ -216,12 +217,12 @@ void ath_gmac_mii_setup(ath_gmac_mac_t *mac)
 
 		mgmt_cfg_val = 7;
 
-		ath_reg_wr(ATH_ETH_CFG, ETH_CFG_RGMII_GE0_SET(1)| 0x3FC000 );
+		ath_reg_wr(ATH_ETH_CFG, ETH_CFG_MII_GE0_SET(1) | ETH_CFG_MII_GE0_SLAVE_SET(1));
 
-		ath_reg_wr(ETH_XMII_ADDRESS,    ETH_XMII_TX_INVERT_SET(1) |
-						ETH_XMII_RX_DELAY_SET(2)  |
-						ETH_XMII_TX_DELAY_SET(2)  |
-						ETH_XMII_GIGE_SET(1));
+		ath_reg_wr(ETH_XMII_ADDRESS,    ETH_XMII_TX_INVERT_SET(0) |
+						ETH_XMII_RX_DELAY_SET(0)  |
+						ETH_XMII_TX_DELAY_SET(0)  |
+						ETH_XMII_GIGE_SET(0));
 
 		ath_gmac_reg_wr(mac, ATH_MAC_MII_MGMT_CFG, mgmt_cfg_val | (1 << 31));
 		ath_gmac_reg_wr(mac, ATH_MAC_MII_MGMT_CFG, mgmt_cfg_val);
@@ -521,7 +522,7 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 			ath_gmac_reg_rmw_clear(mac, ATH_MAC_FIFO_CFG_5, (1 << 19));
 
 			if (is_ar8033()){
-				ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(1) |
+				ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(0) |
 					ETH_XMII_PHASE0_COUNT_SET(1) |  ETH_XMII_PHASE1_COUNT_SET(1));
 			}
 
@@ -743,6 +744,7 @@ athr_mgmt_init(void)
 #ifdef CONFIG_MGMT_INIT
 	uint32_t rddata;
 
+	//MDI
 	rddata = ath_reg_rd(GPIO_IN_ENABLE3_ADDRESS)&
 		~GPIO_IN_ENABLE3_MII_GE1_MDI_MASK;
 	rddata |= GPIO_IN_ENABLE3_MII_GE1_MDI_SET(19);
@@ -750,17 +752,20 @@ athr_mgmt_init(void)
 
 	ath_reg_rmw_clear(GPIO_OE_ADDRESS, (1 << 19));
 
-	ath_reg_rmw_clear(GPIO_OE_ADDRESS, (1 << 17));
+	ath_reg_rmw_clear(GPIO_OE_ADDRESS, (1 << 20));
 
-
+	//MDO
 	rddata = ath_reg_rd(GPIO_OUT_FUNCTION4_ADDRESS) &
-		~ (GPIO_OUT_FUNCTION4_ENABLE_GPIO_19_MASK |
-		GPIO_OUT_FUNCTION4_ENABLE_GPIO_17_MASK);
-
-	rddata |= GPIO_OUT_FUNCTION4_ENABLE_GPIO_19_SET(0x20) |
-	GPIO_OUT_FUNCTION4_ENABLE_GPIO_17_SET(0x21);
-
+		~ (GPIO_OUT_FUNCTION4_ENABLE_GPIO_19_MASK);
+	rddata |= GPIO_OUT_FUNCTION4_ENABLE_GPIO_19_SET(0x20);
 	ath_reg_wr(GPIO_OUT_FUNCTION4_ADDRESS, rddata);
+
+
+	//MDC
+	rddata = ath_reg_rd(GPIO_OUT_FUNCTION5_ADDRESS) &
+		~ (GPIO_OUT_FUNCTION5_ENABLE_GPIO_20_MASK);
+	rddata |= GPIO_OUT_FUNCTION5_ENABLE_GPIO_20_SET(0x21);
+	ath_reg_wr(GPIO_OUT_FUNCTION5_ADDRESS, rddata);
 #endif
 	debug ("%s ::done\n",__func__);
 }
@@ -842,11 +847,11 @@ int ath_gmac_enet_initialize(bd_t * bis)
 		if (!i)
 			athr_mgmt_init();
 
-		if (ath_gmac_macs[i]->mac_unit == 0)
-                        continue;
+		//if (ath_gmac_macs[i]->mac_unit == 0)
+                //        continue;
 #endif
 		eth_register(dev[i]);
-#ifdef CFG_CMD_MII
+#ifdef CONFIG_CMD_MII
 		miiphy_register(dev[i]->name, ath_gmac_miiphy_read, ath_gmac_miiphy_write);
 #endif
 		ath_gmac_mii_setup(ath_gmac_macs[i]);
@@ -865,11 +870,6 @@ int ath_gmac_enet_initialize(bd_t * bis)
 #endif
 
 		} else {
-#ifdef CONFIG_ATHR_8033_PHY
-			debug("AR8033 PHY init \n");
-			athrs_ar8033_reg_init(NULL);
-
-#endif
 
 #if defined(CONFIG_MGMT_INIT) && defined (CONFIG_ATHR_SWITCH_ONLY_MODE)
 			athrs17_reg_init();
@@ -877,6 +877,11 @@ int ath_gmac_enet_initialize(bd_t * bis)
 			athrs17_reg_init_wan();
 #endif
 		}
+#ifdef CONFIG_ATHR_8033_PHY
+		debug("AR8033 PHY init \n");
+		athrs_ar8033_reg_init(&(ath_gmac_macs[i]->mac_unit));
+
+#endif
 #ifdef CONFIG_ATHRS_GMAC_SGMII
 	/*
          * MAC unit 1 or drqfn package call sgmii setup.
@@ -916,7 +921,7 @@ int ath_gmac_enet_initialize(bd_t * bis)
 
 
 int
-ath_gmac_miiphy_read(char *devname, uint32_t phy_addr, uint8_t reg, uint16_t *data)
+ath_gmac_miiphy_read(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short *data)
 {
 	ath_gmac_mac_t *mac   = ath_gmac_name2mac(devname);
 	uint16_t      addr  = (phy_addr << ATH_ADDR_SHIFT) | reg, val;
@@ -958,7 +963,7 @@ ath_gmac_miiphy_read(char *devname, uint32_t phy_addr, uint8_t reg, uint16_t *da
 }
 
 int
-ath_gmac_miiphy_write(char *devname, uint32_t phy_addr, uint8_t reg, uint16_t data)
+ath_gmac_miiphy_write(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short data)
 {
 	ath_gmac_mac_t *mac   = ath_gmac_name2mac(devname);
 	uint16_t      addr  = (phy_addr << ATH_ADDR_SHIFT) | reg;

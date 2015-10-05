@@ -142,10 +142,13 @@ void ath_gpio_config(void)
 
 #ifdef CONFIG_PHY_RESET_GPIO
 	/* Reset PHY */
-	ath_reg_rmw_clear(GPIO_OE_ADDRESS, (1 << CONFIG_PHY_RESET_GPIO));
-	ath_reg_rmw_clear(GPIO_OUT_ADDRESS, (1 << CONFIG_PHY_RESET_GPIO));
+	ath_reg_rmw_clear(GPIO_OE_ADDRESS,
+			 (1 << CONFIG_PHY_RESET_GPIO) | (1 << CONFIG_PHY1_RESET_GPIO));
+	ath_reg_rmw_clear(GPIO_OUT_ADDRESS,
+			 (1 << CONFIG_PHY_RESET_GPIO)| (1 << CONFIG_PHY1_RESET_GPIO));
 	udelay(100000);
-	ath_reg_rmw_set(GPIO_OUT_ADDRESS, (1 << CONFIG_PHY_RESET_GPIO));
+	ath_reg_rmw_set (GPIO_OUT_ADDRESS,
+			(1 << CONFIG_PHY_RESET_GPIO)| (1 << CONFIG_PHY1_RESET_GPIO));
 #endif
 
 #ifdef CONFIG_PCIE0_RESET_GPIO
