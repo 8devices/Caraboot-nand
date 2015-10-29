@@ -354,17 +354,20 @@ static int do_mii(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 		for (addr = addrlo; addr <= addrhi; addr++) {
 			for (reg = reglo; reg <= reghi; reg++) {
 				data = 0xffff;
-				if (miiphy_read (devname, addr, reg, &data) != 0) {
-					printf(
-					"Error reading from the PHY addr=%02x reg=%02x\n",
-						addr, reg);
-					rcode = 1;
-				} else {
+				
+				miiphy_read (devname, addr, reg, &data);
+				
+// 				if (miiphy_read (devname, addr, reg, &data) != 0) {
+// 					printf(
+// 					"Error reading from the PHY addr=%02x reg=%02x\n",
+// 						addr, reg);
+// 					rcode = 1;
+// 				} else {
 					if ((addrlo != addrhi) || (reglo != reghi))
 						printf("addr=%02x reg=%02x data=",
 							(uint)addr, (uint)reg);
 					printf("%04X\n", data & 0x0000FFFF);
-				}
+// 				}
 			}
 			if ((addrlo != addrhi) && (reglo != reghi))
 				printf("\n");
@@ -448,7 +451,63 @@ static int do_mii(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
 	return rcode;
 }
 
+
+
+int get_mmdx_value(uint32_t phy ,uint16_t reg, char* eth, unsigned short mmd_addr)
+{
+	int ret;
+	ath_gmac_miiphy_write(eth, phy, 0xd, mmd_addr);
+	ath_gmac_miiphy_write(eth, phy, 0xe, reg);
+	ath_gmac_miiphy_write(eth, phy, 0xd, 0x4000 | mmd_addr);
+	ret = ath_gmac_miiphy_read(eth, phy, 0xe, NULL);
+	
+	return ret;
+}
+
 /***************************************************/
+
+static int do_miidump(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+{
+	unsigned char	addr, reg;
+	unsigned short	data, mask;
+	int		rcode = 0;
+	const char	*devname;
+	int i;
+	
+	unsigned short val;
+	
+	addr = 0;
+	devname = "eth0";
+	
+	if (argc > 1)
+		devname = "eth1";
+		
+	
+	printf("%s PHY regs\n", devname);
+	for (reg = 0; reg <= 0x1F; reg++) {
+		ath_gmac_miiphy_read(devname, 0, reg, &val);
+		printf("Reg@%04x = %04x \n", reg, val);
+	}
+	
+	unsigned short mmd3_regs[] = {0x0, 0x1, 0x14, 0x16, 0x8003, 0x8009,
+					0x8012, 0x804A, 0x804B, 0x804C,
+					0x805A,0x805B,0x805C,0x805D};
+	printf("%s MMD3 regs\n",devname);
+	for (i = 0; i < ARRAY_SIZE(mmd3_regs); i++){
+		val = get_mmdx_value(0, mmd3_regs[i], devname, 0x3);
+		printf ("MMD3@%04x = %04x \n", mmd3_regs[i], val);
+	}
+
+	unsigned short mmd7_regs[] = {0x0, 0x3C, 0x3D, 0x8000, 0x8016};
+	printf("%s MMD7 regs\n",devname);
+	for (i = 0; i < ARRAY_SIZE(mmd7_regs); i++){
+		val = get_mmdx_value(0, mmd7_regs[i], devname, 0x7);
+		printf ("MMD7@%04x = %04x \n", mmd7_regs[i], val);
+	}
+
+}
+
+
 
 U_BOOT_CMD(
 	mii, 6, 1, do_mii,
@@ -463,3 +522,12 @@ U_BOOT_CMD(
 	"mii dump   <addr> <reg>               - pretty-print <addr> <reg> (0-5 only)\n"
 	"Addr and/or reg may be ranges, e.g. 2-7."
 );
+
+
+U_BOOT_CMD(
+	dumpmii, 6, 1, do_miidump,
+	"MII utility commands",
+	"device                            - list available devices\n"
+	"Addr and/or reg may be ranges, e.g. 2-7."
+);
+

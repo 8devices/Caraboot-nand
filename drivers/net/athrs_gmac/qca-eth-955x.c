@@ -45,6 +45,7 @@
 #define ath_gmac_name2mac(name)	   is_drqfn() ? ath_gmac_unit2mac(1):strcmp(name,"eth0") ? ath_gmac_unit2mac(1) : ath_gmac_unit2mac(0)
 
 int ath_gmac_miiphy_read(const char *devname, unsigned char addr, unsigned char reg, unsigned short *value);
+int ath_gmac_miiphy_read_noret(const char *devname, unsigned char addr, unsigned char reg, unsigned short *value);
 int ath_gmac_miiphy_write(const char *devname, unsigned char addr, unsigned char reg, unsigned short value);
 
 extern void ath_sys_frequency(uint32_t *, uint32_t *, uint32_t *);
@@ -852,7 +853,7 @@ int ath_gmac_enet_initialize(bd_t * bis)
 #endif
 		eth_register(dev[i]);
 #ifdef CONFIG_CMD_MII
-		miiphy_register(dev[i]->name, ath_gmac_miiphy_read, ath_gmac_miiphy_write);
+		miiphy_register(dev[i]->name, ath_gmac_miiphy_read_noret, ath_gmac_miiphy_write);
 #endif
 		ath_gmac_mii_setup(ath_gmac_macs[i]);
 
@@ -919,7 +920,13 @@ int ath_gmac_enet_initialize(bd_t * bis)
 	return 1;
 }
 
-
+int
+ath_gmac_miiphy_read_noret(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short *data)
+{
+	ath_gmac_miiphy_read(devname,phy_addr, reg, data);
+	return 0;
+}
+	
 int
 ath_gmac_miiphy_read(const char *devname, unsigned char phy_addr, unsigned char reg, unsigned short *data)
 {
