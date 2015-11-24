@@ -15,6 +15,7 @@ obj-$(CONFIG_PCI) += pci.o
 endif
 obj-$(CONFIG_PCI) += pci_common.o pci_auto.o pci_rom.o
 
+obj-$(CONFIG_ATH_PCI) += ath_pci.o
 obj-$(CONFIG_FSL_PCI_INIT) += fsl_pci_init.o
 obj-$(CONFIG_PCI_INDIRECT_BRIDGE) += pci_indirect.o
 obj-$(CONFIG_PCI_GT64120) += pci_gt64120.o

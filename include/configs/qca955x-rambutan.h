@@ -68,6 +68,13 @@
 #define CONFIG_PHYLIB
 #define CONFIG_ATHRS_GMAC_SGMII
 
+// PCI
+#define CONFIG_PCI
+#define CONFIG_ATH_PCI
+#define CONFIG_PCI_PLATDEV_INIT_NOOP
+#define CONFIG_CMD_PCI
+
+
 // Factory
 #define CONFIG_FACTORY_MODE
 #define CONFIG_FACTORY_IMG_FILENAME 	"rambutan.bin"
@@ -222,5 +229,6 @@
 	"args1=ubi.mtd=3 root=ubi0:rootfs1 rootfstype=ubifs ro\0"				\
 	"args2=ubi.mtd=3 root=ubi0:rootfs2 rootfstype=ubifs ro\0"				\
 	"tftptimeout=5000\0"
+
 
 #endif	/* __RAMBUTAN_CONFIG_H */
