@@ -861,7 +861,7 @@ ath_nand_erase(struct mtd_info *mtd, struct erase_info *instr)
 	for (j = 0, i = s_first; j < n; j++, i += mtd->erasesize) {
 		uint32_t ba0, ba1;
 
-		if (ath_nand_block_isbad(mtd, i)) {
+		if ((!instr->scrub) && ath_nand_block_isbad(mtd, i)) {
 			bad ++;
 			continue;
 		}
