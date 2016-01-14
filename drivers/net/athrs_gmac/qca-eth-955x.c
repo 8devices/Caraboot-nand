@@ -716,8 +716,9 @@ static void ath_gmac_get_ethaddr(struct eth_device *dev)
 	if (strcmp(dev->name, "eth0") == 0) {
 		memcpy(mac, eeprom, 6);
 	} else if (strcmp(dev->name, "eth1") == 0) {
-		 // Use 1st MAC for eth1, in case PCBA has only one interface - eth1
-		memcpy(mac, eeprom, 6);
+		memcpy(mac, eeprom + 6, 6);
+		if (!is_valid_ethaddr(mac))	//Try using eth0 MAC if eth1 address is invalid
+			memcpy(mac, eeprom, 6);
 	} else {
 		printf("%s: unknown ethernet device %s\n", __func__, dev->name);
 		return;
