@@ -220,5 +220,6 @@
 	"args=ubi.mtd=3 ro board=RAMBUTAN\0"							\
 	"tftptimeout=5000\0"
 
+#define CONFIG_CARABOOT_RELEASE "v3.0"
 
 #endif	/* __RAMBUTAN_CONFIG_H */

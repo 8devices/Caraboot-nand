@@ -278,7 +278,7 @@ phys_size_t initdram(int board_type)
 int checkboard(args)
 {
 	puts("=========================================\n");
-	puts("Caraboot v2.2-dev (QCA9557, NAND) U-Boot\n");
+	puts("Caraboot "CONFIG_CARABOOT_RELEASE" (QCA9557, NAND) U-Boot\n");
 	puts("http://www.8devices.com/\n");
 	puts("-----------------------------------------\n");
 	return 0;
