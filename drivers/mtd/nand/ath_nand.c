@@ -1264,7 +1264,7 @@ nand_param_page(ath_nand_sc_t *sc, uint8_t *buf, unsigned count)
 	if ((rddata == READ_PARAM_STATUS_OK) &&
 	    (buf[3] == 'O' && buf[2] == 'N' && buf[1] == 'F' && buf[0] == 'I')) {
 		ath_nand_onfi_endian_convert(buf);
-		printf("ONFI %s\n", buf + ONFI_DEV_DESC);
+		debug("ONFI %s\n", buf + ONFI_DEV_DESC);
 		return 0;
 	}
 

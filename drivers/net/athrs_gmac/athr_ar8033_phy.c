@@ -96,7 +96,7 @@ athrs_ar8033_reg_init(void *arg)
 	int mac_unit;
 	
 	mac_unit = *(int *)arg;
-	printf("%s: MAC unit: %x\n", __func__, mac_unit);
+	debug("%s: MAC unit: %x\n", __func__, mac_unit);
 
 	id1 = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 2);
 	id2 = phy_reg_read(mac_unit, CONFIG_AR8035_PHY_ADDR, 3);
