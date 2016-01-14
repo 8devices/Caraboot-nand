@@ -42,8 +42,8 @@
 #define CONFIG_MTD_DEVICE
 #define CONFIG_MTD_PARTITIONS
 #define CONFIG_CMD_MTDPARTS
-#define MTDPARTS_DEFAULT	"mtdparts=ath-nand:3M(u-boot),2M(u-boot-env),1M(art),122M(ubi)"
-#define MTDIDS_DEFAULT		"nand0=ath-nand"
+#define MTDPARTS_DEFAULT	"mtdparts=ar934x-nfc:3M(u-boot),2M(u-boot-env),1M(art),122M(ubi)"
+#define MTDIDS_DEFAULT		"nand0=ar934x-nfc"
 
 // UART 
 #define CONFIG_ATH79_SERIAL 1
@@ -201,48 +201,23 @@
 
 #define CONFIG_EXTRA_ENV_SETTINGS								\
 	"bootcmd=run setup && run bootlinux\0"							\
-	"altbootcmd=if test $changed = 0; then run do_change; else run do_recovery; fi\0"	\
-	"setup=if test $active = 1; then run setup1; else run setup2; fi\0" 			\
-	"setup1=partname=1 && setenv bootargs ${args_common} ${mtdparts} ${args1}\0"		\
-	"setup2=partname=2 && setenv bootargs ${args_common} ${mtdparts} ${args2}\0"		\
-	"bootlinux=run boot1 boot2 boot3 boot4 || reset\0"					\
-	"boot1=echo Booting from partition: ${partname}\0"					\
-	"boot2=ubi part ubi\0"									\
-	"boot3=ubi readvol ${loadaddr} kernel${partname}\0"					\
-	"boot4=bootm ${loadaddr}\0"								\
-	"do_change=run change1 change2 change3; reset\0"					\
-	"change1=if test $active = 1; then setenv active 2; else setenv active 1; fi\0"		\
-	"change2=setenv bootcount; setenv changed 1; saveenv\0"					\
-	"change3=echo Active partition changed to [$active]\0"					\
-	"do_recovery=run rec1 rec2 rec3 rec4 rec5 rec6 rec7 rec8 rec9 rec10 rec11; reset\0"	\
-	"rec1=echo Doing firmware recovery!\0"							\
-	"rec2=setenv active 1 && setenv changed 0 && setenv bootcount 0\0"			\
-	"rec3=saveenv\0"									\
-	"rec4=tftpboot ${tftp_loadaddr} ${recovery_file}\0"					\
-	"rec5=ubi part ubi\0"									\
-	"rec6=imxtract ${tftp_loadaddr} rootfs $loadaddr\0"					\
-	"rec7=ubi writevol ${loadaddr} rootfs1 ${filesize}\0"					\
-	"rec8=ubi writevol ${loadaddr} rootfs2 ${filesize}\0"					\
-	"rec9=imxtract ${tftp_loadaddr} kernel ${loadaddr}\0"					\
-	"rec10=ubi writevol ${loadaddr} kernel1 ${filesize}\0"					\
-	"rec11=ubi writevol ${loadaddr} kernel2 ${filesize}\0"					\
-	"do_ubi_init=ubi part ubi; run ubii1 ubii2 ubii3\0"					\
-	"ubii1=ubi create kernel1 300000 s; ubi create kernel2 300000 s\0"			\
-	"ubii2=ubi create rootfs1 2000000 s; ubi create rootfs2 2000000 s\0"			\
-	"ubii3=ubi create data 2A00000 d; ubi create cfg 300000 d\0"				\
+	"setup=setenv bootargs ${args_common} ${mtdparts} ${args}\0"				\
+	"bootlinux=run boot1 boot2 boot3 || reset\0"						\
+	"boot1=ubi part ubi\0"									\
+	"boot2=ubi readvol ${loadaddr} kernel\0"						\
+	"boot3=bootm ${loadaddr}\0"								\
 	"bootlimit=3\0"										\
 	"bootcount=0\0"										\
-	"upgrade_available=1\0"									\
+	"upgrade_available=0\0"									\
 	"changed=0\0"										\
-	"netretry=2\0"										\
+	"netretry=3\0"										\
 	"loadaddr=0x82000000\0"									\
 	"tftp_loadaddr=0x80060000\0"								\
 	"bootfile=fwupdate.bin\0"								\
 	"recovery_file=fwupdate.bin\0"								\
 	"mtdparts="MTDPARTS_DEFAULT"\0" 							\
-	"args_common=console=ttyS0,115200 init=/linuxrc\0" 					\
-	"args1=ubi.mtd=3 root=ubi0:rootfs1 rootfstype=ubifs ro\0"				\
-	"args2=ubi.mtd=3 root=ubi0:rootfs2 rootfstype=ubifs ro\0"				\
+	"args_common=console=ttyS0,115200\0" 							\
+	"args=ubi.mtd=3 ro board=RAMBUTAN\0"							\
 	"tftptimeout=5000\0"
 
 
