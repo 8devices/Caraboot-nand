@@ -213,8 +213,6 @@
 	"netretry=3\0"										\
 	"loadaddr=0x82000000\0"									\
 	"tftp_loadaddr=0x80060000\0"								\
-	"bootfile=fwupdate.bin\0"								\
-	"recovery_file=fwupdate.bin\0"								\
 	"mtdparts="MTDPARTS_DEFAULT"\0" 							\
 	"args_common=console=ttyS0,115200\0" 							\
 	"args=ubi.mtd=3 ro board=RAMBUTAN\0"							\
