@@ -104,6 +104,7 @@ ath_gmac_send(struct eth_device *dev, void *packet, int length)
 
 	ath_gmac_tx_give_to_dma(f);
 	flush_cache((u32) packet, length);
+	flush_cache((u32) f, sizeof(f));
 	ath_gmac_reg_wr(mac, ATH_DMA_TX_DESC, virt_to_phys(f));
 	ath_gmac_reg_wr(mac, ATH_DMA_TX_CTRL, ATH_TXE);
 
@@ -115,8 +116,12 @@ ath_gmac_send(struct eth_device *dev, void *packet, int length)
 	if (i == MAX_WAIT)
 		printf("Tx Timed out\n");
 
+	ath_gmac_reg_wr(mac, ATH_DMA_TX_CTRL, 0);
+	udelay(100);
+
 	f->pkt_start_addr = 0;
 	f->pkt_size = 0;
+	flush_cache((u32) f, sizeof(f));
 
 	if (++mac->next_tx >= NO_OF_TX_FIFOS)
 		mac->next_tx = 0;
@@ -136,6 +141,9 @@ static int ath_gmac_recv(struct eth_device *dev)
 
 	for (;;) {
 		f = mac->fifo_rx[mac->next_rx];
+		// Workaround for cache invalidate
+		memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
+
 		if (ath_gmac_rx_owned_by_dma(f)) {
 		/* check if the current Descriptor is_empty is 1,But the DMAed count is not-zero
 		then move to desciprot where the packet is available */
@@ -149,6 +157,9 @@ static int ath_gmac_recv(struct eth_device *dev)
 							mac->next_rx = 0;
 						}
 						f = mac->fifo_rx[mac->next_rx];
+						// Workaround for cache invalidate
+						memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
+
 						/*
 						* Break on valid data in the desc by checking
 						*  empty bit.
