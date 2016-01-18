@@ -120,6 +120,7 @@
 
 #define CONFIG_ENV_OFFSET_REDUND	CONFIG_ENV_OFFSET + CONFIG_ENV_RANGE
 #define CONFIG_ENV_SIZE_REDUND		CONFIG_ENV_SIZE
+#define CONFIG_ENV_OVERWRITE		/* allow env overwriting */
 
 #define CONFIG_BOOTCOUNT_LIMIT
 #define CONFIG_BOOTCOUNT_ENV
@@ -214,8 +215,8 @@
 	"loadaddr=0x82000000\0"									\
 	"tftp_loadaddr=0x80060000\0"								\
 	"mtdparts="MTDPARTS_DEFAULT"\0" 							\
-	"args_common=console=ttyS0,115200\0" 							\
-	"args=ubi.mtd=3 ro board=RAMBUTAN\0"							\
+	"args_common=board=RAMBUTAN console=ttyS0,115200\0" 					\
+	"args=ubi.mtd=3 ro\0"									\
 	"tftptimeout=5000\0"
 
 #define CONFIG_CARABOOT_RELEASE "v3.0"
