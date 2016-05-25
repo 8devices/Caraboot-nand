@@ -104,7 +104,7 @@ ath_gmac_send(struct eth_device *dev, void *packet, int length)
 
 	ath_gmac_tx_give_to_dma(f);
 	flush_cache((u32) packet, length);
-	flush_cache((u32) f, sizeof(f));
+
 	ath_gmac_reg_wr(mac, ATH_DMA_TX_DESC, virt_to_phys(f));
 	ath_gmac_reg_wr(mac, ATH_DMA_TX_CTRL, ATH_TXE);
 
@@ -121,7 +121,6 @@ ath_gmac_send(struct eth_device *dev, void *packet, int length)
 
 	f->pkt_start_addr = 0;
 	f->pkt_size = 0;
-	flush_cache((u32) f, sizeof(f));
 
 	if (++mac->next_tx >= NO_OF_TX_FIFOS)
 		mac->next_tx = 0;
@@ -141,8 +140,6 @@ static int ath_gmac_recv(struct eth_device *dev)
 
 	for (;;) {
 		f = mac->fifo_rx[mac->next_rx];
-		// Workaround for cache invalidate
-		memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
 
 		if (ath_gmac_rx_owned_by_dma(f)) {
 		/* check if the current Descriptor is_empty is 1,But the DMAed count is not-zero
@@ -157,9 +154,6 @@ static int ath_gmac_recv(struct eth_device *dev)
 							mac->next_rx = 0;
 						}
 						f = mac->fifo_rx[mac->next_rx];
-						// Workaround for cache invalidate
-						memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
-
 						/*
 						* Break on valid data in the desc by checking
 						*  empty bit.
@@ -175,10 +169,12 @@ static int ath_gmac_recv(struct eth_device *dev)
 		}
 
 		length = f->pkt_size;
-
-		net_process_received_packet(net_rx_packets[mac->next_rx] , length - 4);
-
-		flush_cache((u32) net_rx_packets[mac->next_rx] , PKTSIZE_ALIGN);
+		
+		if (length > 4 && length <= 1536) {
+			invalidate_dcache_range(net_rx_packets[mac->next_rx],
+						net_rx_packets[mac->next_rx] + length);
+			net_process_received_packet(net_rx_packets[mac->next_rx] , length - 4);
+		}
 
 		ath_gmac_reg_wr(mac,0x194,1);
 		ath_gmac_rx_give_to_dma(f);
@@ -618,11 +614,11 @@ static int ath_gmac_alloc_fifo(int ndesc, ath_gmac_desc_t ** fifo)
 		return -1;
 	}
 
-	memset((void*)p, 0, size);
-
 	p = (uchar *) (((u32) p + CFG_CACHELINE_SIZE - 1) &
 			~(CFG_CACHELINE_SIZE - 1));
 	p = (uchar *) UNCACHED_SDRAM(p);
+
+	memset((void*)p, 0, size);
 
 	for (i = 0; i < ndesc; i++)
 		fifo[i] = (ath_gmac_desc_t *) p + i;
@@ -642,10 +638,6 @@ static int ath_gmac_setup_fifos(ath_gmac_mac_t *mac)
 			virt_to_phys(mac->fifo_tx[0]) : virt_to_phys(mac->fifo_tx[i + 1]);
 		ath_gmac_tx_own(mac->fifo_tx[i]);
 	}
-	// Workaround for cache invalidate
-	memcpy((void*)KSEG0ADDR(mac->fifo_tx[0]),
-	       (void*)KSEG1ADDR(mac->fifo_tx[0]),
-	       sizeof(ath_gmac_desc_t) * NO_OF_TX_FIFOS);
 
 	mac->next_tx = 0;
 
@@ -656,10 +648,6 @@ static int ath_gmac_setup_fifos(ath_gmac_mac_t *mac)
 		mac->fifo_rx[i]->next_desc = (i == PKTBUFSRX - 1) ?
 			virt_to_phys(mac->fifo_rx[0]) : virt_to_phys(mac->fifo_rx[i + 1]);
 	}
-	// Workaround for cache invalidate
-	memcpy((void*)KSEG0ADDR(mac->fifo_rx[0]),
-	       (void*)KSEG1ADDR(mac->fifo_rx[0]),
-	       sizeof(ath_gmac_desc_t) * PKTBUFSRX);
 
 	mac->next_rx = 0;
 
