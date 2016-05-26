@@ -114,13 +114,6 @@
 
 #define CONFIG_SHOW_ACTIVITY
 
-// ENV
-// #define CONFIG_ENV_IS_IN_UBI
-// #define CONFIG_ENV_UBI_PART "ubi"
-// #define CONFIG_ENV_UBI_VOLUME "uboot-env-1"
-// #define CONFIG_ENV_UBI_VOLUME_REDUND "uboot-env-2"
-// #define	CONFIG_ENV_IS_NOWHERE	1
-
 #define CONFIG_ENV_IS_IN_NAND
 #define CONFIG_SYS_REDUNDAND_ENVIRONMENT
 #define CONFIG_ENV_SIZE			0x20000  /*128kB*/
@@ -137,7 +130,6 @@
 // FIT image format
 #define CONFIG_FIT
 
-// #define CONFIG_SYS_NO_FLASH 1
 #define CONFIG_CMDLINE_EDITING 1 
 #define CONFIG_AUTO_COMPLETE
 #define CONFIG_BOOTDELAY	1	/* autoboot after 1 seconds	*/
@@ -154,8 +146,6 @@
 #define CONFIG_CMD_ATHREG
 #define CONFIG_NET_RETRY_COUNT 1
 #define	CONFIG_DISPLAY_BOARDINFO
-
-// #undef CONFIG_CMD_FLASH
 
 /*
  * Miscellaneous configurable options
@@ -201,13 +191,15 @@
 #define CONFIG_RESET_BUTTON_GPIO 18
 #define CONFIG_PHY_RESET_GPIO 17
 #define CONFIG_PHY1_RESET_GPIO 23
-// TODO fixup spi flash driver
-#define CONFIG_SPI_ATH_FLASH
-#define CFG_FLASH_BASE 0x9f000000
-#define CFG_MAX_FLASH_BANKS 1
-#define CFG_FLASH_SIZE (16*1024*1024)
-#define CFG_FLASH_SECTOR_SIZE (64*1024)
 
+// Disable SPI flash driver
+// #define CONFIG_SPI_ATH_FLASH
+// #define CFG_FLASH_BASE 0x9f000000
+// #define CFG_MAX_FLASH_BANKS 1
+// #define CFG_FLASH_SIZE (16*1024*1024)
+// #define CFG_FLASH_SECTOR_SIZE (64*1024)
+#define CONFIG_SYS_NO_FLASH
+#undef CONFIG_CMD_IMLS
 
 #define CONFIG_EXTRA_ENV_SETTINGS								\
 	"bootcmd=run setup && run bootlinux\0"							\
