@@ -165,7 +165,7 @@ void ath_gpio_config(void)
 	ath_reg_rmw_set(GPIO_OUT_ADDRESS, (1 << CONFIG_PCIE1_RESET_GPIO));
 #endif
 
-	/* GPIO16 input button */
+	/* GPIO18 input button */
 	ath_reg_rmw_set(GPIO_OE_ADDRESS, (1 << CONFIG_RESET_BUTTON_GPIO));
 	
 	/* SETUP LED GPIO */

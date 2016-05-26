@@ -81,6 +81,15 @@
 #define CONFIG_EHCI_HCD_INIT_AFTER_RESET
 #define CONFIG_EHCI_IS_TDI
 
+//USB_BOOT
+#define CONFIG_USB_BOOT
+#define CFG_USB_BOOT_MAX_PARTITIONS_SCAN        16
+#define CFG_USB_RECOVERY_LOAD_ADDR              0x80060000
+#define CFG_MAX_USB_RECOVERY_FILE_SIZE          0x07a00000 /* 122MB */
+#define CFG_USB_BOOT_FILENAME                   "8dev_uimage.bin"
+#define CFG_USB_RECOVERY_FILENAME               "8dev_recovery.bin"
+#define CFG_USB_RECOVERY_FW_PART_NAME      	"ubi"
+
 //FS
 #define CONFIG_FS_FAT
 #define CONFIG_CMD_FAT
@@ -189,7 +198,7 @@
 #define CONFIG_SYS_INIT_SP_OFFSET	0x1000
 
 
-#define CONFIG_RESET_BUTTON_GPIO 19
+#define CONFIG_RESET_BUTTON_GPIO 18
 #define CONFIG_PHY_RESET_GPIO 17
 #define CONFIG_PHY1_RESET_GPIO 23
 // TODO fixup spi flash driver
@@ -203,7 +212,8 @@
 #define CONFIG_EXTRA_ENV_SETTINGS								\
 	"bootcmd=run setup && run bootlinux\0"							\
 	"setup=setenv bootargs ${args_common} ${mtdparts} ${args}\0"				\
-	"bootlinux=run boot1 boot2 boot3 || reset\0"						\
+	"bootlinux=run boot0 boot1 boot2 boot3 || reset\0"					\
+	"boot0=usb_boot_file\0"									\
 	"boot1=ubi part ubi\0"									\
 	"boot2=ubi readvol ${loadaddr} kernel\0"						\
 	"boot3=bootm ${loadaddr}\0"								\
