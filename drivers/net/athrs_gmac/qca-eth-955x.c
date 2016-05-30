@@ -140,6 +140,8 @@ static int ath_gmac_recv(struct eth_device *dev)
 
 	for (;;) {
 		f = mac->fifo_rx[mac->next_rx];
+		// Workaround for DMA descriptor corruption
+		memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
 
 		if (ath_gmac_rx_owned_by_dma(f)) {
 		/* check if the current Descriptor is_empty is 1,But the DMAed count is not-zero
@@ -153,6 +155,8 @@ static int ath_gmac_recv(struct eth_device *dev)
 						if (++mac->next_rx >= PKTBUFSRX) {
 							mac->next_rx = 0;
 						}
+						// Workaround for DMA descriptor corruption
+						memcpy((void*)KSEG0ADDR(f), (void*)KSEG1ADDR(f), sizeof(ath_gmac_desc_t));
 						f = mac->fifo_rx[mac->next_rx];
 						/*
 						* Break on valid data in the desc by checking
@@ -618,7 +622,7 @@ static int ath_gmac_alloc_fifo(int ndesc, ath_gmac_desc_t ** fifo)
 			~(CFG_CACHELINE_SIZE - 1));
 	p = (uchar *) UNCACHED_SDRAM(p);
 
-	memset((void*)p, 0, size);
+	memset((void*)p, 0, sizeof(ath_gmac_desc_t) * ndesc);
 
 	for (i = 0; i < ndesc; i++)
 		fifo[i] = (ath_gmac_desc_t *) p + i;
