@@ -1,15 +1,26 @@
 if TARGET_8DEV_RAMBUTAN
 
 config SYS_BOARD
-	string
 	default "8devices/qca"
 
 config SYS_SOC
-	string
 	default "qca955x"
 
 config SYS_CONFIG_NAME
-	string
 	default "qca955x-rambutan"
 
 endif
+
+if TARGET_8DEV_RAMBUTAN_SPI
+
+config SYS_BOARD
+	default "8devices/qca"
+
+config SYS_SOC
+	default "qca955x"
+
+config SYS_CONFIG_NAME
+	default "qca955x-rambutan-spi"
+
+endif
+

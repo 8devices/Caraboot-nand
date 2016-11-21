@@ -278,7 +278,11 @@ phys_size_t initdram(int board_type)
 int checkboard(args)
 {
 	puts("=========================================\n");
+#if defined(CONFIG_TARGET_8DEV_RAMBUTAN)
 	puts("Caraboot "CONFIG_CARABOOT_RELEASE" (QCA9557, NAND) U-Boot\n");
+#elif defined(CONFIG_TARGET_8DEV_RAMBUTAN_SPI)
+	puts("Caraboot "CONFIG_CARABOOT_RELEASE" (QCA9557, SPI) U-Boot\n");
+#endif
 	puts("http://www.8devices.com/\n");
 	puts("-----------------------------------------\n");
 	return 0;

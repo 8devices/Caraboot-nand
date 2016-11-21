@@ -11,6 +11,10 @@
 #include <asm/asm.h>
 #include <asm/regdef.h>
 #include <asm/mipsregs.h>
+#include <asm/addrspace.h>
+#ifdef CONFIG_ATHEROS
+#	include <atheros.h>
+#endif
 
 #ifndef CONFIG_SYS_MIPS_CACHE_MODE
 #define CONFIG_SYS_MIPS_CACHE_MODE CONF_CM_CACHABLE_NONCOHERENT
@@ -115,14 +119,100 @@ _start:
 	.align 4
 reset:
 
-	/* Clear watch registers */
-	MTC0	zero, CP0_WATCHLO
-	MTC0	zero, CP0_WATCHHI
+#if !defined(CONFIG_ATH_NAND_BR)
+	/*
+	 * Clearing CP0 registers - This is generally required for the MIPS-24k
+	 * core used by Atheros.
+	 */
+	mtc0	zero, $0
+	mtc0	zero, $1
+	mtc0	zero, $2
+	mtc0	zero, $3
+	mtc0	zero, $4
+	mtc0	zero, $5
+	mtc0	zero, $6
+	mtc0	zero, $7
+	mtc0	zero, $8
+	mtc0	zero, $9
+	mtc0	zero, $10
+	mtc0	zero, $11
+	li	t0, 0x10000004
+	mtc0	t0, $12
+	mtc0	zero, $13
+	mtc0	zero, $14
+	mtc0	zero, $15
+	mtc0	zero, $16
 
-	/* WP(Watch Pending), SW0/1 should be cleared */
+#ifdef CONFIG_MACH_QCA955x
+/*
+ * Workaround recommnded by MIPS for the Scorpion Freeze issue
+ */
+#define CONFIG_SCO_JRCD		1
+#define CONFIG_SCO_IAGN		!CONFIG_SCO_JRCD
+
+#if CONFIG_SCO_IAGN && CONFIG_SCO_JRCD
+#error Both CONFIG_SCO_IAGN and CONFIG_SCO_JRCD set
+#endif
+
+#if CONFIG_SCO_JRCD
+	/*
+	 * JR Cache Prediction Disable. Disables JR target address prediction.
+	 * Bit [0], CP0 Register 16, Select 6
+	 *	0 - JR cache target address prediction is enabled.
+	 *	1 - JR cache target address prediction is not enabled.
+	 */
+	mfc0	t0,	$16,	6
+	li	t1,	(1 << 0)
+	or	t0,	t0,	t1
+	mtc0	t0,	$16,	6
+#endif
+
+#if CONFIG_SCO_IAGN
+	/*
+	 * Bit [25], CP0 Register 16, Select 7
+	 * Selective control of out-of-order behavior: issue ALU-side or
+	 * load/store-side instructions (respectively) in program order.
+	 */
+	mfc0	t0,	$16,	7
+	li	t1,	(1 << 25)
+	or	t0,	t0,	t1
+	mtc0	t0,	$16,	7
+#endif
+#endif /* CONFIG_MACH_QCA955x */
+
+	mtc0	zero, $17
+	mtc0	zero, $18
+	mtc0	zero, $19
+	mtc0	zero, $20
+	mtc0	zero, $21
+	mtc0	zero, $22
+	mtc0	zero, $23
+	mtc0	zero, $24
+	mtc0	zero, $25
+	mtc0	zero, $26
+	mtc0	zero, $27
+	mtc0	zero, $28
+	mtc0	zero, $29	# C0_TagHi
+	mtc0	zero, $28, 2	# C0_DTagLo
+	mtc0	zero, $29, 2	# C0_DTagHi
+#endif
+
+	/*
+	 * Clear watch registers.
+	 */
+
+	mtc0	zero, CP0_WATCHLO
+	mtc0	zero, CP0_WATCHHI
+
+	/* STATUS register */
+	mfc0	k0, CP0_STATUS
+	li	k1, ~ST0_IE
+	and	k0, k1
+        mtc0	zero, CP0_CAUSE
+	mtc0	k0, CP0_STATUS
+
+	/* CAUSE register */
 	mtc0	zero, CP0_CAUSE
-
-	setup_c0_status STATUS_SET 0
 
 	/* Init Timer */
 	mtc0	zero, CP0_COUNT
@@ -133,18 +223,6 @@ reset:
 	li	t0, CONF_CM_UNCACHED
 	mtc0	t0, CP0_CONFIG
 #endif
-
-
-/* QCA specific */
-#ifdef CONFIG_ATH_NAND_BR
-	/*
-	 * Clear WDT that was setup in first stage for
-	 * NAND Boot-ROM
-	 */
-/* 	li	t0,	0xb8060008 */
-/* 	sw	zero,	0(t0) */
-#endif /* CONFIG_ATH_NAND_BR */
-
 
 	/*
 	 * Initialize $gp, force pointer sized alignment of bal instruction to
@@ -164,8 +242,18 @@ reset:
 	jalr	t9
 	 nop
 
+	PTR_LA	t0, rel_start
+	jalr	t0
+	nop
+rel_start:
+
+	/* Config SPI clock */
+	li	a0,	KSEG1ADDR(ATH_SPI_CLOCK)
+	li	t0,	0x246
+	sw	t0,	0(a0)
+
 	/* Initialize caches... */
-	PTR_LA	t9, mips_cache_reset
+	PTR_LA	t9, simple_mips_cache_reset
 	jalr	t9
 	 nop
 

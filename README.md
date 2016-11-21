@@ -50,4 +50,9 @@ CROSS_COMPILE=your_work_dir/buildroot/output/host/usr/bin/mips-linux- make
 The bootloader binary will be saved to ```u-boot.bin``` file.
 You can now use this file to upgrade your bootloader on Rambutan board.
 
+To build SPI version:
+```
+make rambutan_spi_defconfig
+CROSS_COMPILE=your_work_dir/buildroot/output/host/usr/bin/mips-linux- make
+```
 

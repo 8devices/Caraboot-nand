@@ -58,6 +58,13 @@ config TARGET_8DEV_RAMBUTAN
 	select SUPPORTS_CPU_MIPS32_R2
 	select SYS_MIPS_CACHE_INIT_RAM_LOAD
 
+config TARGET_8DEV_RAMBUTAN_SPI
+	bool "Support 8Devices Rambutan SPI boot option"
+	select SUPPORTS_BIG_ENDIAN
+	select SUPPORTS_CPU_MIPS32_R1
+	select SUPPORTS_CPU_MIPS32_R2
+	select SYS_MIPS_CACHE_INIT_RAM_LOAD
+
 endchoice
 
 source "board/dbau1x00/Kconfig"

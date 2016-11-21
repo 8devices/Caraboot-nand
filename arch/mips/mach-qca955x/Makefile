@@ -5,10 +5,5 @@
 # SPDX-License-Identifier:	GPL-2.0+
 #
 
-# obj-y	 = start.o
-# obj-y	+= cpu.o
-extra-y += 
 obj-y	+= init-955x.o
-
-# extra-y += tap-955x.o 955x.o
-# obj-y	+= 955x.o cache.o 
+obj-$(CONFIG_LOWLEVEL_INIT) += 955x.o tap-955x.o cache.o
