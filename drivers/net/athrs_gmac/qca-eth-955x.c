@@ -519,11 +519,20 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 			ath_gmac_set_mac_if(mac, 1);
 			ath_gmac_reg_rmw_set(mac, ATH_MAC_FIFO_CFG_5, (1 << 19));
 
-			if (is_ar8033()){
-				ath_reg_wr(ETH_XMII_ADDRESS,    ETH_XMII_TX_INVERT_SET(1) |
-					ETH_XMII_RX_DELAY_SET(2)  |
-					ETH_XMII_TX_DELAY_SET(2)  |
-					ETH_XMII_GIGE_SET(1));
+			if (is_ar8033()) {
+				if (mac->mac_unit == 0) {
+					ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(1) |
+						ETH_XMII_RX_DELAY_SET(2)  |
+						ETH_XMII_TX_DELAY_SET(2)  |
+						ETH_XMII_GIGE_SET(1));
+				}
+				else if (mac->mac_unit == 1) {
+					ath_reg_wr(ETH_SGMII_ADDRESS,
+						ETH_SGMII_RX_DELAY_SET(1) |
+						ETH_SGMII_TX_DELAY_SET(1) |
+						ETH_SGMII_GIGE_SET(1)     |
+						ETH_SGMII_CLK_SEL_GIGE_SET(1));
+				}
 			}
 	
 			break;
@@ -534,10 +543,15 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 			ath_gmac_reg_rmw_clear(mac, ATH_MAC_FIFO_CFG_5, (1 << 19));
 
 			if (is_ar8033()){
-				ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(0) |
-					ETH_XMII_PHASE0_COUNT_SET(1) |  ETH_XMII_PHASE1_COUNT_SET(1));
+				if (mac->mac_unit == 0) {
+					ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(0) |
+						ETH_XMII_PHASE0_COUNT_SET(1) |  ETH_XMII_PHASE1_COUNT_SET(1));
+				}
+				else if (mac->mac_unit == 1) {
+					ath_reg_wr(ETH_SGMII_ADDRESS,
+						ETH_SGMII_PHASE0_COUNT_SET(1) |  ETH_SGMII_PHASE1_COUNT_SET(1));
+				}
 			}
-
 			break;
 
 		case _10BASET:
@@ -545,11 +559,16 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 			ath_gmac_set_mac_speed(mac, 0);
 			ath_gmac_reg_rmw_clear(mac, ATH_MAC_FIFO_CFG_5, (1 << 19));
 
-			if (is_ar8033()){
-				ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(1) |
-					ETH_XMII_PHASE0_COUNT_SET(19) |  ETH_XMII_PHASE1_COUNT_SET(19));
+			if (is_ar8033()) {
+				if (mac->mac_unit == 0) {
+					ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(1) |
+						ETH_XMII_PHASE0_COUNT_SET(19) |  ETH_XMII_PHASE1_COUNT_SET(19));
+				}
+				else if (mac->mac_unit == 1) {
+					ath_reg_wr(ETH_SGMII_ADDRESS,
+						ETH_SGMII_PHASE0_COUNT_SET(19) |  ETH_SGMII_PHASE1_COUNT_SET(19));
+				}
 			}
-			
 			break;
 
 		default:

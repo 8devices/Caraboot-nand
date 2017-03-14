@@ -281,6 +281,55 @@ typedef struct {
 #define ETH_XMII_ADDRESS                                             0x18050028
 
 
+#define ETH_SGMII_TX_INVERT_MSB                                       31
+#define ETH_SGMII_TX_INVERT_LSB                                       31
+#define ETH_SGMII_TX_INVERT_MASK                                      0x80000000
+#define ETH_SGMII_TX_INVERT_GET(x)                                    (((x) & ETH_SGMII_TX_INVERT_MASK) >> ETH_SGMII_TX_INVERT_LSB)
+#define ETH_SGMII_TX_INVERT_SET(x)                                    (((x) << ETH_SGMII_TX_INVERT_LSB) & ETH_SGMII_TX_INVERT_MASK)
+#define ETH_SGMII_TX_INVERT_RESET                                     0x0 // 0
+#define ETH_SGMII_GIGE_QUAD_MSB                                       30
+#define ETH_SGMII_GIGE_QUAD_LSB                                       30
+#define ETH_SGMII_GIGE_QUAD_MASK                                      0x40000000
+#define ETH_SGMII_GIGE_QUAD_GET(x)                                    (((x) & ETH_SGMII_GIGE_QUAD_MASK) >> ETH_SGMII_GIGE_QUAD_LSB)
+#define ETH_SGMII_GIGE_QUAD_SET(x)                                    (((x) << ETH_SGMII_GIGE_QUAD_LSB) & ETH_SGMII_GIGE_QUAD_MASK)
+#define ETH_SGMII_GIGE_QUAD_RESET                                     0x0 // 0
+#define ETH_SGMII_RX_DELAY_MSB                                        29
+#define ETH_SGMII_RX_DELAY_LSB                                        28
+#define ETH_SGMII_RX_DELAY_MASK                                       0x30000000
+#define ETH_SGMII_RX_DELAY_GET(x)                                     (((x) & ETH_SGMII_RX_DELAY_MASK) >> ETH_SGMII_RX_DELAY_LSB)
+#define ETH_SGMII_RX_DELAY_SET(x)                                     (((x) << ETH_SGMII_RX_DELAY_LSB) & ETH_SGMII_RX_DELAY_MASK)
+#define ETH_SGMII_RX_DELAY_RESET                                      0x0 // 0
+#define ETH_SGMII_TX_DELAY_MSB                                        27
+#define ETH_SGMII_TX_DELAY_LSB                                        26
+#define ETH_SGMII_TX_DELAY_MASK                                       0x0c000000
+#define ETH_SGMII_TX_DELAY_GET(x)                                     (((x) & ETH_SGMII_TX_DELAY_MASK) >> ETH_SGMII_TX_DELAY_LSB)
+#define ETH_SGMII_TX_DELAY_SET(x)                                     (((x) << ETH_SGMII_TX_DELAY_LSB) & ETH_SGMII_TX_DELAY_MASK)
+#define ETH_SGMII_TX_DELAY_RESET                                      0x0 // 0
+#define ETH_SGMII_CLK_SEL_GIGE_MSB                                    25
+#define ETH_SGMII_CLK_SEL_GIGE_LSB                                    25
+#define ETH_SGMII_CLK_SEL_GIGE_MASK                                   0x02000000
+#define ETH_SGMII_CLK_SEL_GIGE_GET(x)                                 (((x) & ETH_SGMII_CLK_SEL_GIGE_MASK) >> ETH_SGMII_CLK_SEL_GIGE_LSB)
+#define ETH_SGMII_CLK_SEL_GIGE_SET(x)                                 (((x) << ETH_SGMII_CLK_SEL_GIGE_LSB) & ETH_SGMII_CLK_SEL_GIGE_MASK)
+#define ETH_SGMII_CLK_SEL_GIGE_RESET                                  0x1 // 1
+#define ETH_SGMII_GIGE_MSB                                            24
+#define ETH_SGMII_GIGE_LSB                                            24
+#define ETH_SGMII_GIGE_MASK                                           0x01000000
+#define ETH_SGMII_GIGE_GET(x)                                         (((x) & ETH_SGMII_GIGE_MASK) >> ETH_SGMII_GIGE_LSB)
+#define ETH_SGMII_GIGE_SET(x)                                         (((x) << ETH_SGMII_GIGE_LSB) & ETH_SGMII_GIGE_MASK)
+#define ETH_SGMII_GIGE_RESET                                          0x0 // 0
+#define ETH_SGMII_PHASE1_COUNT_MSB                                    15
+#define ETH_SGMII_PHASE1_COUNT_LSB                                    8
+#define ETH_SGMII_PHASE1_COUNT_MASK                                   0x0000ff00
+#define ETH_SGMII_PHASE1_COUNT_GET(x)                                 (((x) & ETH_SGMII_PHASE1_COUNT_MASK) >> ETH_SGMII_PHASE1_COUNT_LSB)
+#define ETH_SGMII_PHASE1_COUNT_SET(x)                                 (((x) << ETH_SGMII_PHASE1_COUNT_LSB) & ETH_SGMII_PHASE1_COUNT_MASK)
+#define ETH_SGMII_PHASE1_COUNT_RESET                                  0x1 // 1
+#define ETH_SGMII_PHASE0_COUNT_MSB                                    7
+#define ETH_SGMII_PHASE0_COUNT_LSB                                    0
+#define ETH_SGMII_PHASE0_COUNT_MASK                                   0x000000ff
+#define ETH_SGMII_PHASE0_COUNT_GET(x)                                 (((x) & ETH_SGMII_PHASE0_COUNT_MASK) >> ETH_SGMII_PHASE0_COUNT_LSB)
+#define ETH_SGMII_PHASE0_COUNT_SET(x)                                 (((x) << ETH_SGMII_PHASE0_COUNT_LSB) & ETH_SGMII_PHASE0_COUNT_MASK)
+#define ETH_SGMII_PHASE0_COUNT_RESET                                  0x1 // 1
+#define ETH_SGMII_ADDRESS                                             0x18050048
 
 #define ETH_CFG_ETH_SPARE_MSB                                        31
 #define ETH_CFG_ETH_SPARE_LSB                                        22
