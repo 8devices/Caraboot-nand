@@ -58,6 +58,7 @@ typedef struct {
 				speed,
 				mac_unit,
 				mac_base;
+	uint8_t			txclk_invt;
 } ath_gmac_mac_t;
 
 #define ath_gmac_reg_wr(_mac, _x, _y)	ath_reg_wr(((_x) + _mac->mac_base), (_y))

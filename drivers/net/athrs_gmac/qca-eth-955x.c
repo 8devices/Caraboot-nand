@@ -505,6 +505,10 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 	ath_gmac_phy_link(mac->mac_unit, &link);
 	ath_gmac_phy_duplex(mac->mac_unit, &duplex);
 	ath_gmac_phy_speed(mac->mac_unit, &speed);
+	if(speed == -1){
+		printf("Invalid speed. Reading speed again..");
+		ath_gmac_phy_speed(mac->mac_unit, &speed);
+	}
 
 	mac->link = link;
 
@@ -527,14 +531,19 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 						ETH_XMII_GIGE_SET(1));
 				}
 				else if (mac->mac_unit == 1) {
-					ath_reg_wr(ETH_SGMII_ADDRESS,
-						ETH_SGMII_RX_DELAY_SET(1) |
-						ETH_SGMII_TX_DELAY_SET(1) |
-						ETH_SGMII_GIGE_SET(1)     |
-						ETH_SGMII_CLK_SEL_GIGE_SET(1));
+
+					ath_reg_rmw_set(ATH_ETH_CFG, ETH_CFG_ETH_RXD_DELAY_SET(3)| 
+							ETH_CFG_ETH_RXDV_DELAY_SET(3)|ETH_CFG_RGMII_GE0_SET(1));
+
+                                        ath_reg_wr(ETH_SGMII_ADDRESS, 0 );
+                                        mdelay(1000);
+                                        ath_reg_wr(ETH_SGMII_ADDRESS, ETH_SGMII_TX_INVERT_SET(1) |
+                                                ETH_SGMII_RX_DELAY_SET(2) | ETH_SGMII_TX_DELAY_SET(0) |
+                                                ETH_SGMII_GIGE_SET(1));
+					if(mac->txclk_invt)
+						ath_reg_rmw_clear(ETH_SGMII_ADDRESS,ETH_SGMII_TX_INVERT_SET(1));
 				}
 			}
-	
 			break;
 
 		case _100BASET:
@@ -548,8 +557,23 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 						ETH_XMII_PHASE0_COUNT_SET(1) |  ETH_XMII_PHASE1_COUNT_SET(1));
 				}
 				else if (mac->mac_unit == 1) {
-					ath_reg_wr(ETH_SGMII_ADDRESS,
-						ETH_SGMII_PHASE0_COUNT_SET(1) |  ETH_SGMII_PHASE1_COUNT_SET(1));
+
+                                        ath_reg_wr(ATH_ETH_CFG , ETH_CFG_ETH_RXDV_DELAY_SET(0) |
+                                                ETH_CFG_ETH_RXD_DELAY_SET(0)|ETH_CFG_RGMII_GE0_SET(1));
+                                        ath_reg_wr(ETH_SGMII_ADDRESS, 0 );
+
+                                        if(mac->txclk_invt) {
+                                                ath_reg_wr(ETH_SGMII_ADDRESS, ETH_SGMII_TX_INVERT_SET(0) |
+                                                ETH_SGMII_RX_DELAY_SET(0)  | ETH_SGMII_TX_DELAY_SET(0)
+                                                | ETH_SGMII_GIGE_SET(0) | ETH_SGMII_PHASE1_COUNT_SET(1)
+                                                | ETH_SGMII_PHASE0_COUNT_SET(1));
+                                        } else {
+                                                ath_reg_wr(ETH_SGMII_ADDRESS, ETH_SGMII_TX_INVERT_SET(1) |
+                                                ETH_SGMII_RX_DELAY_SET(0)  | ETH_SGMII_TX_DELAY_SET(0)
+                                                | ETH_SGMII_GIGE_SET(0) | ETH_SGMII_PHASE1_COUNT_SET(1)
+                                                | ETH_SGMII_PHASE0_COUNT_SET(1));
+                                        }
+					mdelay(10);
 				}
 			}
 			break;
@@ -562,11 +586,28 @@ static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 			if (is_ar8033()) {
 				if (mac->mac_unit == 0) {
 					ath_reg_wr(ETH_XMII_ADDRESS, ETH_XMII_TX_INVERT_SET(1) |
-						ETH_XMII_PHASE0_COUNT_SET(19) |  ETH_XMII_PHASE1_COUNT_SET(19));
+						ETH_XMII_PHASE0_COUNT_SET(19) | ETH_XMII_PHASE1_COUNT_SET(19));
 				}
 				else if (mac->mac_unit == 1) {
 					ath_reg_wr(ETH_SGMII_ADDRESS,
-						ETH_SGMII_PHASE0_COUNT_SET(19) |  ETH_SGMII_PHASE1_COUNT_SET(19));
+						ETH_SGMII_PHASE0_COUNT_SET(19) | ETH_SGMII_PHASE1_COUNT_SET(19));
+
+                                                ath_reg_wr(ATH_ETH_CFG, ETH_CFG_ETH_RXDV_DELAY_SET(0) |
+                                                                ETH_CFG_ETH_RXD_DELAY_SET(0)|ETH_CFG_RGMII_GE0_SET(1));
+                                                                ath_reg_wr(ETH_XMII_ADDRESS, 0 );
+
+						if (mac->txclk_invt) {
+                                                        ath_reg_wr(ETH_SGMII_ADDRESS, ETH_SGMII_TX_INVERT_SET(0) |
+                                                                ETH_SGMII_RX_DELAY_SET(0)  | ETH_SGMII_TX_DELAY_SET(0)
+                                                                | ETH_SGMII_GIGE_SET(0) | ETH_SGMII_PHASE1_COUNT_SET(0x13)
+                                                                | ETH_SGMII_PHASE0_COUNT_SET(0x13));
+						} else {
+                                                        ath_reg_wr(ETH_SGMII_ADDRESS, ETH_SGMII_TX_INVERT_SET(1) |
+                                                                ETH_SGMII_RX_DELAY_SET(0)  | ETH_SGMII_TX_DELAY_SET(0)
+                                                                | ETH_SGMII_GIGE_SET(0) | ETH_SGMII_PHASE1_COUNT_SET(0x13)
+                                                                | ETH_SGMII_PHASE0_COUNT_SET(0x13));
+                                                }
+						mdelay(10);
 				}
 			}
 			break;
@@ -936,6 +977,8 @@ int ath_gmac_enet_initialize(bd_t * bis)
 
 
 	ath_gmac_phy_setup(ath_gmac_macs[i]->mac_unit);
+	udelay(100 * 10000);
+
 		debug("%s up\n",dev[i]->name);
 	}
 
