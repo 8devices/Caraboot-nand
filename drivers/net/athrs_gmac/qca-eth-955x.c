@@ -36,7 +36,7 @@
 #include <atheros.h>
 #include "qca-eth-955x.h"
 #include "qca-eth-955x_phy.h"
-#define SGMII_LINK_WAR_MAX_TRY 10
+#define SGMII_LINK_WAR_MAX_TRY 40
 
 #ifdef CFG_CMD_MII
 #include <miiphy.h>
@@ -370,6 +370,34 @@ athrs_sgmii_res_cal(void)
 	while (!(ath_reg_rd(SGMII_SERDES_ADDRESS) & SGMII_SERDES_LOCK_DETECT_STATUS_MASK));
 }
 
+void athrs_sgmii_reset_link()
+{
+/*
+ * SGMII reset sequence suggested by systems team.
+ */
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_RX_CLK_N_RESET);
+
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1));
+
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_125M_N_SET(1));
+
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
+                                    |SGMII_RESET_TX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_125M_N_SET(1));
+
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
+                                    |SGMII_RESET_TX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_CLK_N_SET(1));
+
+	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
+                                    |SGMII_RESET_TX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_125M_N_SET(1)
+                                    |SGMII_RESET_RX_CLK_N_SET(1)
+                                    |SGMII_RESET_TX_CLK_N_SET(1));
+}
+
 #ifdef CONFIG_ATHRS_GMAC_SGMII
 static void athr_gmac_sgmii_setup()
 {
@@ -395,33 +423,12 @@ static void athr_gmac_sgmii_setup()
 
 	ath_reg_wr(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_AN_ENABLE_SET(1));
 #endif
-/*
- * SGMII reset sequence suggested by systems team.
- */
 
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_RX_CLK_N_RESET);
+	athrs_sgmii_reset_link();
 
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1));
 
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_125M_N_SET(1));
-
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
-                                    |SGMII_RESET_TX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_125M_N_SET(1));
-
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
-                                    |SGMII_RESET_TX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_CLK_N_SET(1));
-
-	ath_reg_wr(SGMII_RESET_ADDRESS, SGMII_RESET_HW_RX_125M_N_SET(1)
-                                    |SGMII_RESET_TX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_125M_N_SET(1)
-                                    |SGMII_RESET_RX_CLK_N_SET(1)
-                                    |SGMII_RESET_TX_CLK_N_SET(1));
-
-        ath_reg_rmw_clear(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
+	ath_reg_rmw_clear(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
+	udelay(100000);
 	/*
 	 * WAR::Across resets SGMII link status goes to weird
 	 * state.
@@ -429,20 +436,25 @@ static void athr_gmac_sgmii_setup()
 	 * for sure we are in bad  state.
 	 * Issue a PHY reset in MR_AN_CONTROL_ADDRESS to keep going.
 	 */
-	status = (ath_reg_rd(SGMII_DEBUG_ADDRESS) & 0xff);
-	while (!(status == 0xf || status == 0x10)) {
 
-		ath_reg_rmw_set(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
-		udelay(100);
-		ath_reg_rmw_clear(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
-		if (count++ == SGMII_LINK_WAR_MAX_TRY) {
-			debug ("Max resets limit reached exiting...\n");
-			break;
-	    	}
-		status = (ath_reg_rd(SGMII_DEBUG_ADDRESS) & 0xff);
+	status = (ath_reg_rd(SGMII_DEBUG_ADDRESS));
+	printf("sgmii st: 0x%x\n", status);
+	while (count++ <= SGMII_LINK_WAR_MAX_TRY) {
+		if (!((status & 0xff) == 0xf || (status & 0xff) == 0x10) || (status & BIT(26)) == 0x0) {
+			printf("Reset link sgmii st: 0x%x\n", status);
+			ath_reg_rmw_set(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
+			athrs_sgmii_reset_link();
+			udelay(100000);
+			ath_reg_rmw_clear(MR_AN_CONTROL_ADDRESS, MR_AN_CONTROL_PHY_RESET_SET(1));
+		}
+		else{
+			//printf(".");
+		}
+		udelay(100000);
+		status = (ath_reg_rd(SGMII_DEBUG_ADDRESS));
 	}
 
-	debug("%s SGMII done\n",__func__);
+	printf("%s SGMII done\n",__func__);
 }
 #endif
 
