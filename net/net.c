@@ -704,6 +704,7 @@ int net_start_again(void)
 			net_set_timeout_handler(10000UL,
 						start_again_timeout_handler);
 			net_set_udp_handler(NULL);
+			net_set_state(NETLOOP_RESTART);
 		} else {
 			net_set_state(NETLOOP_FAIL);
 		}
