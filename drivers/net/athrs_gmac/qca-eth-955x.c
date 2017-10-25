@@ -513,12 +513,26 @@ static void ath_gmac_hw_start(ath_gmac_mac_t *mac)
 static int ath_gmac_check_link(ath_gmac_mac_t *mac)
 {
 	int link, duplex, speed;
+	int retry = 0;
 
 	ath_gmac_phy_link(mac->mac_unit, &link);
 	ath_gmac_phy_duplex(mac->mac_unit, &duplex);
 	ath_gmac_phy_speed(mac->mac_unit, &speed);
-	if(speed == -1){
-		printf("Invalid speed. Reading speed again..");
+
+
+    while (speed == -1 && retry++ < 4) {
+        printf("Invalid speed. Reset phy, reading speed again..\n");
+
+        /* Reset PHY */
+        ath_reg_rmw_clear(GPIO_OE_ADDRESS,
+                 (1 << CONFIG_PHY_RESET_GPIO) | (1 << CONFIG_PHY1_RESET_GPIO));
+        ath_reg_rmw_clear(GPIO_OUT_ADDRESS,
+                 (1 << CONFIG_PHY_RESET_GPIO)| (1 << CONFIG_PHY1_RESET_GPIO));
+        udelay(100000);
+        ath_reg_rmw_set (GPIO_OUT_ADDRESS,
+                (1 << CONFIG_PHY_RESET_GPIO)| (1 << CONFIG_PHY1_RESET_GPIO));
+        udelay(400000);
+
 		ath_gmac_phy_speed(mac->mac_unit, &speed);
 	}
 
